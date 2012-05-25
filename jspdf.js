@@ -70,6 +70,7 @@ var jsPDF = function(orientation, unit, format){
 	var pageFontSize = 16;
 	var pageFontName = HELVETICA;
 	var pageFontType = NORMAL;
+	var images = new Array();
 
 	// Initilisation 
 	if (unit == 'pt') {
@@ -210,8 +211,42 @@ var jsPDF = function(orientation, unit, format){
 		fonts.push({key: 'F' + (fonts.length + 1), number: objectNumber, name: name, fontName: fontName, type: fontType});
 	}
 	
+	var addImage = function(data, w, h) {
+		var i = images.length;
+		
+		images[i] = {
+			w: w,
+			h: h,
+			cs: 'DeviceRGB', 	//TODO: Detect Colour space
+			bpc: 8, 			//TODO: Detect number of bits
+			f: 'DCTDecode',
+			data: data
+		};
+		
+		return i;
+	}
+	
 	var putImages = function() {
-		// @TODO: Implement image functionality
+		for (var i in  images) {
+			newObject();
+			images[i].n = objectNumber;
+			out('<</Type /XObject');
+			out('/Subtype /Image');
+            out('/Width ' + images[i].w);
+            out('/Height ' + images[i].h);
+			
+			out('/ColorSpace /' + images[i].cs);
+			if (images[i].cs == 'DeviceCMYK') {
+				out('/Decode [1 0 1 0 1 0 1 0]');
+			}
+			
+			out('/BitsPerComponent ' + images[i].bpc);
+            out('/Filter /' + images[i].f);
+            
+            out('/Length ' + images[i].data.length + '>>');
+            putStream(images[i].data);
+            out('endobj');
+		}
 	}
 	
 	var putResourceDictionary = function() {
@@ -434,6 +469,8 @@ var jsPDF = function(orientation, unit, format){
 			return _jsPDF;
 		},
 		addImage: function(imageData, format, x, y, w, h) {
+			var i = addImage(imageData, w, h);
+			out(sprintf('q %.2f 0 0 %.2f %.2f %.2f cm /I%d Do Q', w * k, h * k, x * k, (pageHeight - y) * k, i));
 			return _jsPDF;
 		},
 		output: function(type, options) {
