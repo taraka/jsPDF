@@ -211,7 +211,7 @@ var jsPDF = function(orientation, unit, format){
 		fonts.push({key: 'F' + (fonts.length + 1), number: objectNumber, name: name, fontName: fontName, type: fontType});
 	}
 	
-	var addImage = function(data, w, h) {
+	var pushImage = function(data, w, h) {
 		var i = images.length;
 		
 		images[i] = {
@@ -469,7 +469,7 @@ var jsPDF = function(orientation, unit, format){
 			return _jsPDF;
 		},
 		addImage: function(imageData, format, x, y, w, h) {
-			var i = addImage(imageData, w, h);
+			var i = pushImage(imageData, w, h);
 			out(sprintf('q %.2f 0 0 %.2f %.2f %.2f cm /I%d Do Q', w * k, h * k, x * k, (pageHeight - y) * k, i));
 			return _jsPDF;
 		},
